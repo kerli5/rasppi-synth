@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QLa
 from topbar import TopBar
 from styles import STYLESHEET
 import sys
+from drumpad import DrumPad
 
 class Raspsynth(QMainWindow):
     def __init__(self):
@@ -17,9 +18,22 @@ class Raspsynth(QMainWindow):
 
             ##widget inits go here
             self.main = QWidget()
+            self.layout = QVBoxLayout(self.main)
 
             ##class inits for other GUI elements go here
             self.addToolBar(TopBar(self))
+
+            ##GUI components
+            try:
+                self.layout.addWidget(self.topbar)
+            except Exception as e:
+                print("TopBar failed:", e)
+
+            self.drum_pad = DrumPad()
+            self.layout.addWidget(self.drum_pad)
+
+            self.main.setLayout(self.layout)
+            self.setCentralWidget(self.main)
 
         except:
             print("Something went  during initialization.")
