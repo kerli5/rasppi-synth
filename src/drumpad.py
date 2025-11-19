@@ -1,45 +1,3 @@
-<<<<<<< HEAD
-from PyQt6.QtWidgets import QWidget, QPushButton, QGridLayout
-from PyQt6.QtCore import Qt
-
-class DrumPad(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.initUI()
-
-    def initUI(self):
-        layout = QGridLayout()
-        layout.setSpacing(10)
-
-        for row in range(2):
-            for col in range(4):
-                ##naming pads
-                btn = QPushButton("Pad" + str(row * 4 + col + 1))
-                btn.setFixedSize(100, 100)
-                btn.setStyleSheet("""
-                    QPushButton {
-                        background-color: #2c3e50;
-                        color: white;
-                        border-radius: 8px;
-                        font-size: 14px;
-                    }
-                    QPushButton:hover {
-                        background-color: #34495e;
-                    }
-                    QPushButton:pressed {
-                        background-color: #1abc9c;
-                    }
-                """)
-                #calls the pad_clicked() function.
-                #which button number it was.
-                btn.clicked.connect(lambda _, b=row * 4 + col + 1: self.pad_clicked(b))
-                layout.addWidget(btn, row, col)
-
-        self.setLayout(layout)
-
-    def pad_clicked(self, pad_number):
-        print("Pad" + str(pad_number) + "clicked!")
-=======
 from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton, QMenu
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QCursor
@@ -50,8 +8,8 @@ class Pad(QPushButton):
         self.path = path
         self.pad_num = number
         super().__init__(parent)
-        self.setFixedSize(150, 150)
-        self.setStyleSheet("""
+        self.setFixedSize(150, 150) ## panna drumpad style style sisse
+        self.setStyleSheet("""    
             QPushButton {
                 background-color: #2c3e50;
                 color: white;
@@ -102,4 +60,3 @@ class DrumPad(QWidget):
                 self.pads.append([pad, pad_num])
 
         self.setLayout(layout)
->>>>>>> 67c4a372e52771258c89c7606741397f6ab93653

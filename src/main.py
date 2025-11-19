@@ -5,6 +5,8 @@ from topbar import TopBar
 from styles import STYLESHEET
 import sys
 from drumpad import DrumPad
+from styles import STYLESHEET, ALT_STYLESHEET, topbar, ALT_TOPBAR
+
 
 page_indices = {
     'drumpad': 0
@@ -25,38 +27,17 @@ class Raspsynth(QMainWindow):
             self.widget = QStackedWidget()
             self.setCentralWidget(self.widget)
 
-<<<<<<< HEAD
-            ##widget inits go here
-            self.main = QWidget()
-            self.layout = QVBoxLayout(self.main)
-=======
             # pages
             drumpad_widget = DrumPad(self)
             self.widget.addWidget(drumpad_widget)
->>>>>>> 67c4a372e52771258c89c7606741397f6ab93653
 
             # top bar (toolbar)
             self.topbar = TopBar(self)
             self.addToolBar(self.topbar)
 
-<<<<<<< HEAD
-            ##GUI components
-            try:
-                self.layout.addWidget(self.topbar)
-            except Exception as e:
-                print("TopBar failed:", e)
-
-            self.drum_pad = DrumPad()
-            self.layout.addWidget(self.drum_pad)
-
-            self.main.setLayout(self.layout)
-            self.setCentralWidget(self.main)
-
-        except:
-            print("Something went  during initialization.")
-    
-=======
             self.topbar.navigationRequested.connect(self.setPage)
+
+            self.topbar.themeToggleRequested.connect(self.toggleTheme)
 
             self.setPage('drumpad')
         except Exception as e:
@@ -66,8 +47,15 @@ class Raspsynth(QMainWindow):
         idx = page_indices.get(page_name, 0)
         self.widget.setCurrentIndex(idx)
 
-        
->>>>>>> 67c4a372e52771258c89c7606741397f6ab93653
+    def toggleTheme(self):
+        # compare current stylesheet and swap
+        if self.styleSheet() == STYLESHEET:
+            self.setStyleSheet(ALT_STYLESHEET)
+            self.topbar.setStyleSheet(ALT_TOPBAR)
+        else:
+            self.setStyleSheet(STYLESHEET)
+            self.topbar.setStyleSheet(topbar)
+
 def main():
     app = QApplication(sys.argv)
     window = Raspsynth()
