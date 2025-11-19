@@ -1,32 +1,53 @@
-from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QLabel, QVBoxLayout
+from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
+from PyQt6.QtCore import pyqtSignal
+from drumpad import DrumPad
 from topbar import TopBar
 from styles import STYLESHEET
 import sys
 
+page_indices = {
+    'drumpad': 0
+}
+
 class Raspsynth(QMainWindow):
+    navigationRequested = pyqtSignal(str)
     def __init__(self):
         super().__init__()
         try:
             print("Program is working.")
-            ##window params
+            # window params
             self.setWindowTitle("rasppy v0.0.1")
+            ##self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
             self.setStyleSheet(STYLESHEET)
-            self.setMinimumSize(600,600)
-            self.setMaximumSize(600,600)
-            self.setContentsMargins(20,10,20,20)
+            self.setGeometry(20, 20, 1080, 720)
+            # central widget
+            self.widget = QStackedWidget()
+            self.setCentralWidget(self.widget)
 
-            ##widget inits go here
-            self.main = QWidget()
+            # pages
+            drumpad_widget = DrumPad(self)
+            self.widget.addWidget(drumpad_widget)
 
-            ##class inits for other GUI elements go here
-            self.addToolBar(TopBar(self))
+            # top bar (toolbar)
+            self.topbar = TopBar(self)
+            self.addToolBar(self.topbar)
 
-        except:
-            print("Something went  during initialization.")
-    
+            self.topbar.navigationRequested.connect(self.setPage)
+
+            self.setPage('drumpad')
+        except Exception as e:
+            print("Something went wrong.", e)
+
+    def setPage(self, page_name: str):
+        idx = page_indices.get(page_name, 0)
+        self.widget.setCurrentIndex(idx)
+
+        
 def main():
     app = QApplication(sys.argv)
     window = Raspsynth()
     window.show()
     app.exec()
-main()
+
+if __name__ == "__main__":
+    main()

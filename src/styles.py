@@ -13,10 +13,6 @@ QToolbar {
 QToolButton {
     padding: 0;
     border: none;
-    width: 20px;
-}
-QToolButton:active {
-    background:#fff;
-
+    width: 50px;
 }
 """
