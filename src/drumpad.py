@@ -1,4 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton, QMenu
+from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
+from PyQt6.QtCore import QUrl
 import tkinter
 from tkinter import filedialog
 from gpiozero import *
@@ -6,6 +8,22 @@ from gpiozero import Button
 import time
 import os
 
+class Audio:
+    def __init__(self):
+        self.output = QAudioOutput()
+        self.player = QMediaPlayer()
+        self.player.setAudioOutput(self.output)
+
+        self.output.setVolume(0.9)
+
+    def play(self, path):
+        if not path:
+            return
+        
+        self.player.stop()              
+        self.player.setSource(QUrl.fromLocalFile(path))
+        self.player.play()
+        print("Playing:", path)   
 
 class Pad(QPushButton):
     states = {
@@ -19,8 +37,12 @@ class Pad(QPushButton):
         self.state = state
         self.pad_button = Button(number)
         super().__init__(parent)
-        self.setFixedSize(150, 150)
-        self.setStyleSheet("""
+
+        ## audi player
+        self.audio = Audio()
+        
+        self.setFixedSize(150, 150) ## panna drumpad style style sisse
+        self.setStyleSheet("""    
             QPushButton {
                 background-color: #2c3e50;
                 color: white;
@@ -37,6 +59,11 @@ class Pad(QPushButton):
         if self.pad_num is not None:
             self.setText(f"Pad {self.pad_num}")
 
+        self.clicked.connect(self.playAudio)
+        
+    def playAudio(self):
+        self.audio.play(self.path)
+
     def contextMenuEvent(self, a0): ## a0 -> event if its not working
         menu = QMenu(self)
         pad_modify = menu.addAction("Modify")
@@ -49,7 +76,7 @@ class Pad(QPushButton):
     def modifyMusicFile(self):
         tkinter.Tk().withdraw()
         self.path = filedialog.askopenfilename(filetypes=(("Audio Files", ".wav .mp3"),   ("All Files", "*.*")))
-        if self.path is not "":
+        if self.path != "":
             file_name = os.path.split(self.path)[1]
             self.setText(file_name)
     def resetMusicFile(self):

@@ -5,6 +5,7 @@ from styles import topbar
 
 class TopBar(QToolBar):
     navigationRequested = pyqtSignal(str)
+    themeToggleRequested = pyqtSignal() 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
@@ -39,6 +40,9 @@ class TopBar(QToolBar):
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.addWidget(spacer)
 
+        theme_button = self.addAction("Theme")
+        theme_button.triggered.connect(self._handle_theme_toggle)
+
         close_button = self.addAction("x")
         close_button.setToolTip("Close")
         close_button.triggered.connect(self._handle_close)
@@ -46,7 +50,6 @@ class TopBar(QToolBar):
     def _handle_close(self):
         if self.parent is not None:
             self.parent.close()
-    
-    @pyqtSlot(bool)
-    def enableRecordBtn(self):
-        return 0
+
+    def _handle_theme_toggle(self):
+        self.themeToggleRequested.emit()

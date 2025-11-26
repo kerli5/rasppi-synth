@@ -4,6 +4,9 @@ from drumpad import DrumPad
 from topbar import TopBar
 from styles import STYLESHEET
 import sys
+from drumpad import DrumPad
+from styles import STYLESHEET, ALT_STYLESHEET, topbar, ALT_TOPBAR
+
 
 page_indices = {
     'drumpad': 0
@@ -34,6 +37,8 @@ class Raspsynth(QMainWindow):
 
             self.topbar.navigationRequested.connect(self.setPage)
 
+            self.topbar.themeToggleRequested.connect(self.toggleTheme)
+
             self.setPage('drumpad')
         except Exception as e:
             print("Something went wrong.", e)
@@ -42,7 +47,15 @@ class Raspsynth(QMainWindow):
         idx = page_indices.get(page_name, 0)
         self.widget.setCurrentIndex(idx)
 
-        
+    def toggleTheme(self):
+        # compare current stylesheet and swap
+        if self.styleSheet() == STYLESHEET:
+            self.setStyleSheet(ALT_STYLESHEET)
+            self.topbar.setStyleSheet(ALT_TOPBAR)
+        else:
+            self.setStyleSheet(STYLESHEET)
+            self.topbar.setStyleSheet(topbar)
+
 def main():
     app = QApplication(sys.argv)
     window = Raspsynth()
