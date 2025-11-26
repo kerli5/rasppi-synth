@@ -31,11 +31,11 @@ class Pad(QPushButton):
     'held': 1,
     'looped':2
     }
-    def __init__(self, number = None, path = None, parent = None, state = states[0]):
+    def __init__(self, number = None, path = None, parent = None, state = states['triggered']):
         self.path = path
         self.pad_num = number
         self.state = state
-        self.pad_button = Button(number)
+        ##self.pad_button = Button(number)
         super().__init__(parent)
 
         ## audi player

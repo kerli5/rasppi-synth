@@ -30,10 +30,6 @@ class TopBar(QToolBar):
         self.record_btn.setIcon(QIcon("src/resources/icons/record-icon.svg"))
         self.record_btn.setCheckable(True)
         self.pageswitches.addAction(self.record_btn)
-        try:
-            self.record_btn.toggled.connect(self.enableRecordBtn)
-        except Exception as e:
-            print(e)
         self.addAction(self.record_btn)
 
         spacer = QWidget()
