@@ -1,5 +1,4 @@
 from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton, QMenu
-from PyQt6.QtCore import QUrl, pyqtSignal, QTimer
 from audio import AudioPlayer
 import tkinter
 from gpiozero import Button
@@ -13,47 +12,28 @@ def getProjectBPM():
     return TopBar().bpmslider.value()
 
 class Pad(QPushButton):
-    def __init__(self, number = None, path = None, parent = None, state = 'trigger', bpm = 120):
+    def __init__(self, number = None, path = None, parent = None, loop:bool = False, bpm:int = None):
         super().__init__(parent)
         self.path = path
         self.pad_num = number
-        self.state = state
+        self.loop = loop
 
-        self.bpm = int(bpm)
-        self.audio = AudioPlayer(path = None, bpm = self.bpm)
+        self.bpm = getProjectBPM()
+        self.audio = AudioPlayer(self.bpm, self.loop)
 
         self.gpio = Button(self.pad_num + 1)
 
         self.setFixedSize(150, 150) ## panna drumpad style style sisse
-        self.setStyleSheet("""    
-            QPushButton {
-                background-color: #2c3e50;
-                color: white;
-                border-radius: 8px;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #34495e;
-            }
-            QPushButton:pressed {
-                background-color: #1abc9c;
-            }
-        """)
+
 
         if self.pad_num is not None:
             self.setText(f"Pad {self.pad_num}")
 
-        self.clicked.connect(self.playAudio)
+        self.clicked.connect(self.audio.play_audio)
 
-    def set_bpm(self, bpm):
-        self.bpm = int(bpm)
-        self.audio.set_bpm(self.bpm)
 
-    def playAudio(self):
-        if self.path:
-            self.audio.play(self.path, loop=(self.state == 'loop'))
-        else:
-            pass
+    def play_audio(self):
+        self.audio.play_audio()
 
     def contextMenuEvent(self, a0): ## a0 -> event if its not working
         menu = QMenu(self)
@@ -79,22 +59,24 @@ class Pad(QPushButton):
             self.changeStateLoop()
 
     def changeStateTrigger(self):
-        self.state = 'trigger'
-        print(self.state)
+        self.loop = False
+        print(f"Looping:{self.loop}")
     def changeStateLoop(self):
-        self.state = 'loop'
-        print(self.state)
+        self.loop = True
+        print(f"Looping:{self.loop}")
 
     def modifyMusicFile(self):
         tkinter.Tk().withdraw()
         self.path = filedialog.askopenfilename(filetypes=(("Audio Files", ".wav .mp3"),   ("All Files", "*.*")))
         if self.path != "":
             file_name = os.path.split(self.path)[1]
+            self.audio.load_audio(self.path)
+            print(f"Path:{self.path}")
             self.setText(file_name)
     def resetMusicFile(self):
         if self.path is not None:
             self.path = None
-            self.setText(f"Pad {self.pad_num}")              
+            self.setText(f"Pad {self.pad_num}")
 
 class DrumPad(QWidget):
     pads = []
@@ -102,8 +84,6 @@ class DrumPad(QWidget):
         super().__init__(parent)
 
         self.initUI()
-
-        ##self.pads = []
     
     def initUI(self):
         layout = QGridLayout()

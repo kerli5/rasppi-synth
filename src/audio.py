@@ -1,54 +1,51 @@
-import pygame
+from pydub import AudioSegment
+from pydub.playback import play, _play_with_simpleaudio
+import simpleaudio
+import time
+import math
 
 class AudioPlayer:
-    def __init__(self, *args, path=None, bpm: int = 120):
-        self.path = None
-        self.bpm = int(bpm) if bpm is not None else 120
-        self._loop = False
+    def __init__(self, bpm:int, loop:bool):
+        super().__init__()
 
-        if len(args) > 0:
-            first = args[0]
-            if isinstance(first, int):
-                self.bpm = int(first)
-            elif isinstance(first, str):
-                self.path = first
+        self.bpm = bpm
+        self.delta = 0.25 * (60/bpm)
+        
+        self.volume = 0.9
+        self.sound = None
+        self.loop = loop
 
-        if path is not None:
-            self.path = path
+        
 
-        self._beat_duration = 60.0 / max(1, float(self.bpm))
-
-        pygame.mixer.init()
-        pygame.mixer.music.set_volume(0.9)
-
-    def play(self, path=None, loop: bool = False):
-        if path is not None:
-            self.path = path
-        if not self.path:
-            return
-
+    def load_audio(self, path):
         try:
-            pygame.mixer.music.load(self.path)
+            if isinstance(path, str) and path.endswith('.wav'):
+                self.sound = AudioSegment.from_wav(path)
+            elif isinstance(path, str) and path.endswith('.mp3'):
+                self.sound = AudioSegment.from_mp3(path)
+            elif isinstance(path, str) and path.endswith('.ogg'):
+                self.sound = AudioSegment.from_ogg(path)
+            print(f"[AudioPlayer] loaded sound: {path} -> {'yes' if self.sound else 'no'}")
         except Exception as e:
-            print(f"Audio load error: {e}")
+            print("Audio load error:", e, path)
+
+    def set_volume(self, volume:float):
+        self.volume = max(0.0, min(1.0, volume))
+
+    def _volume_adjusted(self, sound = None):
+        base = self.sound if sound is None else sound
+        if base is None:
+            return None
+        if self.volume == 1.0:
+            return base
+        gain = 20 * math.log10(self.volume) if self.volume > 0 else -120
+        return base + gain
+
+    def play_audio(self):
+        if self.sound is None:
+            print("[AudioPlayer] No sound loaded; nothing to play.")
             return
-
-        self._loop = bool(loop)
-        pygame.mixer.music.play(loops=-1 if loop else 0)
-
-    def set_bpm(self, bpm: int):
-        self.bpm = int(bpm)
-        self._beat_duration = 60.0 / max(1, float(self.bpm))
-
-    def get_beat_duration(self) -> float:
-        return self._beat_duration
-
-    def stop(self):
-        pygame.mixer.music.stop()
-
-    def is_playing(self) -> bool:
-        return pygame.mixer.music.get_busy()
-
-    def close(self):
-        self.stop()
-        pygame.mixer.quit()
+        if self.loop:
+            while self.loop == True:
+                _play_with_simpleaudio(self._volume_adjusted(self.sound))
+        _play_with_simpleaudio(self._volume_adjusted(self.sound))

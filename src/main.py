@@ -1,12 +1,11 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 from PyQt6.QtCore import pyqtSignal
+from styles import STYLESHEET, ALT_STYLESHEET, topbar, ALT_TOPBAR
 from drumpad import DrumPad
 from topbar import TopBar
-from styles import STYLESHEET
 import sys
 import os
-from drumpad import DrumPad
-from styles import STYLESHEET, ALT_STYLESHEET, topbar, ALT_TOPBAR
+
 
 ##env variables
 os.environ['GPIOZERO_PIN_FACTORY']='mock' ##for use in dev
@@ -18,7 +17,6 @@ page_indices = {
 }
 
 class Raspsynth(QMainWindow):
-    navigationRequested = pyqtSignal(str)
     def __init__(self):
         super().__init__()
         try:
@@ -50,26 +48,20 @@ class Raspsynth(QMainWindow):
         except Exception as e:
             print("Something went wrong.", e)
 
-    def updateVolume(self, value):
-        current_page = self.widget.currentWidget()
+    def updateVolume(self, value:int):
+        volume = max(0.0, min(1.0, value / 100))
+        current = self.widget.currentWidget()
+        if hasattr(current, 'pads'):
+            for pad, _ in current.pads:
+                if hasattr(pad, 'audio') and hasattr(pad.audio, 'set_volume'):
+                    pad.audio.set_volume(volume)
 
-    def updateVolume(self, value):
-        current_page = self.widget.currentWidget()
-
-        if hasattr(current_page, "pads"):
-            volume_float = value / 100
-
-            for pad, num in current_page.pads:
-                pad.audio.output.setVolume(volume_float)   # <-- THIS is all you need
-                print(f"Pad {num} volume set to {value}% (float {volume_float})")
-                
 
     def setPage(self, page_name: str):
         idx = page_indices.get(page_name, 0)
         self.widget.setCurrentIndex(idx)
 
     def toggleTheme(self):
-        # compare current stylesheet and swap
         if self.styleSheet() == STYLESHEET:
             self.setStyleSheet(ALT_STYLESHEET)
             self.topbar.setStyleSheet(ALT_TOPBAR)
